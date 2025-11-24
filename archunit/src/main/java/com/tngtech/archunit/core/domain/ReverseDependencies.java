@@ -220,20 +220,20 @@ final class ReverseDependencies {
 
         private void registerConstructors(JavaClass clazz) {
             for (JavaConstructor constructor : clazz.getConstructors()) {
-//                for (JavaClass parameter : constructor.getRawParameterTypes()) {
-//                    constructorParameterTypeDependencies.put(parameter, constructor);
-//                }
-//                for (ThrowsDeclaration<JavaConstructor> throwsDeclaration : constructor.getThrowsClause()) {
-//                    constructorThrowsDeclarationDependencies.put(throwsDeclaration.getRawType(), throwsDeclaration);
-//                }
-//                for (TryCatchBlock tryCatchBlock : constructor.getTryCatchBlocks()) {
-//                    for (JavaClass caughtThrowable : tryCatchBlock.getCaughtThrowables()) {
-//                        tryCatchBlockDependencies.put(caughtThrowable.toErasure(), tryCatchBlock);
-//                    }
-//                }
-//                for (InstanceofCheck instanceofCheck : constructor.getInstanceofChecks()) {
-//                    instanceofCheckDependencies.put(instanceofCheck.getRawType(), instanceofCheck);
-//                }
+                for (JavaClass parameter : constructor.getRawParameterTypes()) {
+                    constructorParameterTypeDependencies.put(parameter, constructor);
+                }
+                for (ThrowsDeclaration<JavaConstructor> throwsDeclaration : constructor.getThrowsClause()) {
+                    constructorThrowsDeclarationDependencies.put(throwsDeclaration.getRawType(), throwsDeclaration);
+                }
+                for (TryCatchBlock tryCatchBlock : constructor.getTryCatchBlocks()) {
+                    for (JavaClass caughtThrowable : tryCatchBlock.getCaughtThrowables()) {
+                        tryCatchBlockDependencies.put(caughtThrowable.toErasure(), tryCatchBlock);
+                    }
+                }
+                for (InstanceofCheck instanceofCheck : constructor.getInstanceofChecks()) {
+                    instanceofCheckDependencies.put(instanceofCheck.getRawType(), instanceofCheck);
+                }
             }
         }
 
