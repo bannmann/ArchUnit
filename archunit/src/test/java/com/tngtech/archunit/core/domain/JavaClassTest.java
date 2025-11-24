@@ -831,7 +831,7 @@ public class JavaClassTest {
                 .areAtLeastOne(methodTryCatchDependency()
                         .from(AhavingMembersOfTypeB.class)
                         .to(B.class)
-                        .inLineNumber(99));
+                        .inLineNumber(30));
     }
 
     @Test
