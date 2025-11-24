@@ -213,12 +213,10 @@ public class LayeredArchitectureTest {
                         expectedAccessViolationPattern(FirstAnyPkgClass.class, "call", SomePkgSubclass.class, "callMe"),
                         expectedAccessViolationPattern(SecondThreeAnyClass.class, "call", SomePkgClass.class, "callMe"),
                         expectedAccessViolationPattern(FirstThreeAnyClass.class, "call", FirstAnyPkgClass.class, "callMe"),
-                        expectedAccessViolationPattern(ClassWithCatch.class, "method2", SomePkgException.class, "getBaz"),
                         expectedFieldTypePattern(FirstAnyPkgClass.class, "illegalTarget", SomePkgSubclass.class),
                         expectedFieldTypePattern(FirstThreeAnyClass.class, "illegalTarget", FirstAnyPkgClass.class),
                         expectedFieldTypePattern(SecondThreeAnyClass.class, "illegalTarget", SomePkgClass.class),
-                        expectedCatchPattern(ClassWithCatch.class, "method1", SomePkgException.class),
-                        expectedCatchPattern(ClassWithCatch.class, "method2", SomePkgException.class)));
+                        expectedCatchPattern(ClassWithCatch.class, "method", SomePkgException.class)));
     }
 
     @DataProvider
