@@ -41,6 +41,7 @@ final class ReverseDependencies {
     private final SetMultimap<JavaClass, JavaMethod> methodParameterTypeDependencies;
     private final SetMultimap<JavaClass, JavaMethod> methodReturnTypeDependencies;
     private final SetMultimap<JavaClass, ThrowsDeclaration<JavaMethod>> methodsThrowsDeclarationDependencies;
+    private final SetMultimap<JavaClass, TryCatchBlock> tryCatchBlockDependencies;
     private final SetMultimap<JavaClass, JavaConstructor> constructorParameterTypeDependencies;
     private final SetMultimap<JavaClass, ThrowsDeclaration<JavaConstructor>> constructorThrowsDeclarationDependencies;
     private final SetMultimap<JavaClass, JavaAnnotation<?>> annotationTypeDependencies;
@@ -58,6 +59,7 @@ final class ReverseDependencies {
         this.methodParameterTypeDependencies = creation.methodParameterTypeDependencies.build();
         this.methodReturnTypeDependencies = creation.methodReturnTypeDependencies.build();
         this.methodsThrowsDeclarationDependencies = creation.methodsThrowsDeclarationDependencies.build();
+        this.tryCatchBlockDependencies = creation.tryCatchBlockDependencies.build();
         this.constructorParameterTypeDependencies = creation.constructorParameterTypeDependencies.build();
         this.constructorThrowsDeclarationDependencies = creation.constructorThrowsDeclarationDependencies.build();
         this.annotationTypeDependencies = creation.annotationTypeDependencies.build();
@@ -114,6 +116,10 @@ final class ReverseDependencies {
         return methodsThrowsDeclarationDependencies.get(clazz);
     }
 
+    Set<TryCatchBlock> getTryCatchBlocksThatCatch(JavaClass clazz) {
+        return tryCatchBlockDependencies.get(clazz);
+    }
+
     Set<JavaConstructor> getConstructorsWithParameterTypeOf(JavaClass clazz) {
         return constructorParameterTypeDependencies.get(clazz);
     }
@@ -150,6 +156,7 @@ final class ReverseDependencies {
         private final ImmutableSetMultimap.Builder<JavaClass, JavaMethod> methodParameterTypeDependencies = ImmutableSetMultimap.builder();
         private final ImmutableSetMultimap.Builder<JavaClass, JavaMethod> methodReturnTypeDependencies = ImmutableSetMultimap.builder();
         private final ImmutableSetMultimap.Builder<JavaClass, ThrowsDeclaration<JavaMethod>> methodsThrowsDeclarationDependencies = ImmutableSetMultimap.builder();
+        private final ImmutableSetMultimap.Builder<JavaClass, TryCatchBlock> tryCatchBlockDependencies = ImmutableSetMultimap.builder();
         private final ImmutableSetMultimap.Builder<JavaClass, JavaConstructor> constructorParameterTypeDependencies = ImmutableSetMultimap.builder();
         private final ImmutableSetMultimap.Builder<JavaClass, ThrowsDeclaration<JavaConstructor>> constructorThrowsDeclarationDependencies = ImmutableSetMultimap.builder();
         private final ImmutableSetMultimap.Builder<JavaClass, JavaAnnotation<?>> annotationTypeDependencies = ImmutableSetMultimap.builder();
@@ -199,6 +206,11 @@ final class ReverseDependencies {
                 methodReturnTypeDependencies.put(method.getRawReturnType(), method);
                 for (ThrowsDeclaration<JavaMethod> throwsDeclaration : method.getThrowsClause()) {
                     methodsThrowsDeclarationDependencies.put(throwsDeclaration.getRawType(), throwsDeclaration);
+                }
+                for (TryCatchBlock tryCatchBlock : method.getTryCatchBlocks()) {
+                    for (JavaClass caughtThrowable : tryCatchBlock.getCaughtThrowables()) {
+                        tryCatchBlockDependencies.put(caughtThrowable.toErasure(), tryCatchBlock);
+                    }
                 }
                 for (InstanceofCheck instanceofCheck : method.getInstanceofChecks()) {
                     instanceofCheckDependencies.put(instanceofCheck.getRawType(), instanceofCheck);

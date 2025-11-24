@@ -1311,6 +1311,14 @@ public final class JavaClass
     }
 
     /**
+     * @return {@link TryCatchBlock TryCatchBlocks} of all imported classes that declare to catch this class.
+     */
+    @PublicAPI(usage = ACCESS)
+    public Set<TryCatchBlock> getTryCatchBlocksThatCatchSelf() {
+        return reverseDependencies.getTryCatchBlocksThatCatch(this);
+    }
+
+    /**
      * @return Constructors of all imported classes that have a parameter type of this class.
      */
     @PublicAPI(usage = ACCESS)
