@@ -1310,11 +1310,7 @@ public class JavaClassTest {
                 .areAtLeastOne(methodChecksInstanceOfDependency()
                         .from(AhavingMembersOfTypeB.class)
                         .to(B.class)
-                        .inLineNumber(25))
-                .areAtLeastOne(methodTryCatchDependency()
-                        .from(AhavingMembersOfTypeB.class)
-                        .to(B.class)
-                        .inLineNumber(30));
+                        .inLineNumber(25));
 
         JavaClass exceptionClass = importClassesWithContext(AhavingMembersOfTypeB.class, B.BException.class)
                 .get(B.BException.class);
@@ -1323,7 +1319,11 @@ public class JavaClassTest {
                 .areAtLeastOne(methodThrowsDeclarationDependency()
                         .from(AhavingMembersOfTypeB.class)
                         .to(B.BException.class)
-                        .inLineNumber(0));
+                        .inLineNumber(0))
+                .areAtLeastOne(methodTryCatchDependency()
+                        .from(AhavingMembersOfTypeB.class)
+                        .to(B.BException.class)
+                        .inLineNumber(30));
     }
 
     @Test
