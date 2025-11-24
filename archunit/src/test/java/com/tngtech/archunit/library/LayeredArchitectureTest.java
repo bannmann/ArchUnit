@@ -1,6 +1,5 @@
 package com.tngtech.archunit.library;
 
-import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
