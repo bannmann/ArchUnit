@@ -270,11 +270,11 @@ final class ReverseDependencies {
 
         private void registerStaticInitializer(JavaClass clazz) {
             clazz.getStaticInitializer().ifPresent(staticInitializer -> {
-//                for (TryCatchBlock tryCatchBlock : staticInitializer.getTryCatchBlocks()) {
-//                    for (JavaClass caughtThrowable : tryCatchBlock.getCaughtThrowables()) {
-//                        tryCatchBlockDependencies.put(caughtThrowable.toErasure(), tryCatchBlock);
-//                    }
-//                }
+                for (TryCatchBlock tryCatchBlock : staticInitializer.getTryCatchBlocks()) {
+                    for (JavaClass caughtThrowable : tryCatchBlock.getCaughtThrowables()) {
+                        tryCatchBlockDependencies.put(caughtThrowable.toErasure(), tryCatchBlock);
+                    }
+                }
                 for (InstanceofCheck instanceofCheck : staticInitializer.getInstanceofChecks()) {
                     instanceofCheckDependencies.put(instanceofCheck.getRawType(), instanceofCheck);
                 }
