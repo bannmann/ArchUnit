@@ -19,7 +19,7 @@ public class ClassWithDependencyOnTryCatchBlock {
         }
     }
 
-    void method() {
+    void simpleCatchMethod() {
         try {
             throw new IOException();
         } catch (IOException e) {
@@ -28,5 +28,12 @@ public class ClassWithDependencyOnTryCatchBlock {
 
     public static void throwingMethod() throws IOException {
         throw new IOException();
+    }
+
+    void complexCatchMethod() {
+        try {
+            throw new IOException();
+        } catch (IllegalStateException | IOException e) {
+        }
     }
 }

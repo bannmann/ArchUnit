@@ -1,15 +1,5 @@
 package com.tngtech.archunit.core.domain;
 
-import java.io.IOException;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.nio.file.FileSystem;
-import java.util.Set;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-
 import com.google.common.base.MoreObjects;
 import com.tngtech.archunit.base.DescribedPredicate;
 import com.tngtech.archunit.core.domain.testobjects.ClassWithArrayDependencies;
@@ -27,25 +17,26 @@ import com.tngtech.java.junit.dataprovider.UseDataProvider;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.nio.file.FileSystem;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.collect.MoreCollectors.onlyElement;
 import static com.tngtech.archunit.core.domain.Dependency.Functions.GET_ORIGIN_CLASS;
 import static com.tngtech.archunit.core.domain.Dependency.Functions.GET_TARGET_CLASS;
-import static com.tngtech.archunit.core.domain.Dependency.Predicates.dependency;
-import static com.tngtech.archunit.core.domain.Dependency.Predicates.dependencyOrigin;
-import static com.tngtech.archunit.core.domain.Dependency.Predicates.dependencyTarget;
-import static com.tngtech.archunit.core.domain.TestUtils.importClassWithContext;
-import static com.tngtech.archunit.core.domain.TestUtils.importClassesWithContext;
-import static com.tngtech.archunit.core.domain.TestUtils.simulateCall;
+import static com.tngtech.archunit.core.domain.Dependency.Predicates.*;
+import static com.tngtech.archunit.core.domain.TestUtils.*;
 import static com.tngtech.archunit.core.domain.properties.HasType.Predicates.rawType;
-import static com.tngtech.archunit.testutil.Assertions.assertThat;
-import static com.tngtech.archunit.testutil.Assertions.assertThatConversionOf;
-import static com.tngtech.archunit.testutil.Assertions.assertThatDependencies;
-import static com.tngtech.archunit.testutil.Assertions.assertThatType;
+import static com.tngtech.archunit.testutil.Assertions.*;
 import static com.tngtech.archunit.testutil.assertion.DependenciesAssertion.from;
-import static com.tngtech.java.junit.dataprovider.DataProviders.$;
-import static com.tngtech.java.junit.dataprovider.DataProviders.$$;
-import static com.tngtech.java.junit.dataprovider.DataProviders.testForEach;
+import static com.tngtech.java.junit.dataprovider.DataProviders.*;
 
 @RunWith(DataProviderRunner.class)
 public class DependencyTest {
@@ -209,12 +200,13 @@ public class DependencyTest {
         return $$(
                 $(javaClass.getStaticInitializer().get(), 9),
                 $(javaClass.getConstructor(), 17),
-                $(javaClass.getMethod("method"), 24));
+                $(javaClass.getMethod("simpleCatchMethod"), 24)
+        );
     }
 
     @Test
     @UseDataProvider("with_try_catch_block_members")
-    public void Dependency_from_catch_block(JavaCodeUnit memberWithTryCatchBlock, int expectedLineNumber) {
+    public void Dependency_from_simple_catch_block(JavaCodeUnit memberWithTryCatchBlock, int expectedLineNumber) {
         TryCatchBlock tryCatchBlock = getOnlyElement(memberWithTryCatchBlock.getTryCatchBlocks());
 
         Dependency dependency = getOnlyElement(Dependency.tryCreateFromTryCatchBlock(tryCatchBlock));
@@ -223,6 +215,28 @@ public class DependencyTest {
                 .matches(ClassWithDependencyOnTryCatchBlock.class, IOException.class)
                 .hasDescription(memberWithTryCatchBlock.getFullName(), "catches type", IOException.class.getName())
                 .inLocation(ClassWithDependencyOnTryCatchBlock.class, expectedLineNumber);
+    }
+
+    @Test
+    public void Dependency_from_union_catch_block() {
+
+        JavaMethod method = importClassesWithContext(ClassWithDependencyOnTryCatchBlock.class, IllegalStateException.class, IOException.class)
+                .get(ClassWithDependencyOnTryCatchBlock.class)
+                .getMethod("simpleCatchMethod");
+        TryCatchBlock tryCatchBlock = getOnlyElement(method.getTryCatchBlocks());
+
+        Set<Dependency> dependencies = Dependency.tryCreateFromTryCatchBlock(tryCatchBlock);
+
+        Assertions.assertThatDependencies(dependencies).satisfiesExactlyInAnyOrder(
+                dependency -> Assertions.assertThatDependency(dependency)
+                    .matches(ClassWithDependencyOnTryCatchBlock.class, IllegalStateException.class)
+                    .hasDescription(method.getFullName(), "catches type", IllegalStateException.class.getName())
+                    .inLocation(ClassWithDependencyOnTryCatchBlock.class, 35),
+                dependency -> Assertions.assertThatDependency(dependency)
+                    .matches(ClassWithDependencyOnTryCatchBlock.class, IOException.class)
+                    .hasDescription(method.getFullName(), "catches type", IOException.class.getName())
+                    .inLocation(ClassWithDependencyOnTryCatchBlock.class, 35)
+                );
     }
 
     @DataProvider
