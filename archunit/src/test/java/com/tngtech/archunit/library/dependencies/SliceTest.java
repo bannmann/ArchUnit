@@ -28,6 +28,7 @@ public class SliceTest {
                         .from(ClassOnlyDependentOnOwnPackageAndObject.class).to(Object.class)
                         .from(FirstThreeAnyClass.class).to(Object.class)
                         .from(FirstThreeAnyClass.class).to(SecondThreeAnyClass.class)
+                        .from(ClassWithCatch.class).to(Object.class)
                         .from(ClassWithCatch.class).to(SomePkgException.class)
         );
     }
