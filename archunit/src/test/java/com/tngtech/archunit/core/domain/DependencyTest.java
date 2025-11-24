@@ -15,6 +15,7 @@ import com.tngtech.archunit.base.DescribedPredicate;
 import com.tngtech.archunit.core.domain.testobjects.ClassWithArrayDependencies;
 import com.tngtech.archunit.core.domain.testobjects.ClassWithDependencyOnInstanceofCheck;
 import com.tngtech.archunit.core.domain.testobjects.ClassWithDependencyOnInstanceofCheck.InstanceOfCheckTarget;
+import com.tngtech.archunit.core.domain.testobjects.ClassWithDependencyOnTryCatchBlock;
 import com.tngtech.archunit.core.domain.testobjects.DependenciesOnClassObjects;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.testutil.Assertions;
@@ -198,6 +199,53 @@ public class DependencyTest {
         assertThatType(dependency.getTargetClass()).matches(IOException.class);
         assertThat(dependency.getDescription()).as("description")
                 .contains("Method <" + origin.getFullName() + "> throws type <" + IOException.class.getName() + ">");
+    }
+
+    @DataProvider
+    public static Object[][] with_try_catch_block_members() {
+        JavaClass javaClass = importClassesWithContext(ClassWithDependencyOnTryCatchBlock.class, IOException.class)
+                .get(ClassWithDependencyOnTryCatchBlock.class);
+
+        return $$(
+                $(javaClass.getStaticInitializer().get(), 9),
+                $(javaClass.getConstructor(), 17),
+                $(javaClass.getMethod("simpleCatchMethod"), 24)
+        );
+    }
+
+    @Test
+    @UseDataProvider("with_try_catch_block_members")
+    public void Dependency_from_simple_catch_block(JavaCodeUnit memberWithTryCatchBlock, int expectedLineNumber) {
+        TryCatchBlock tryCatchBlock = getOnlyElement(memberWithTryCatchBlock.getTryCatchBlocks());
+
+        Dependency dependency = getOnlyElement(Dependency.tryCreateFromTryCatchBlock(tryCatchBlock));
+
+        Assertions.assertThatDependency(dependency)
+                .matches(ClassWithDependencyOnTryCatchBlock.class, IOException.class)
+                .hasDescription(memberWithTryCatchBlock.getFullName(), "catches type", IOException.class.getName())
+                .inLocation(ClassWithDependencyOnTryCatchBlock.class, expectedLineNumber);
+    }
+
+    @Test
+    public void Dependency_from_union_catch_block() {
+
+        JavaMethod method = importClassesWithContext(ClassWithDependencyOnTryCatchBlock.class, IllegalStateException.class, IOException.class)
+                .get(ClassWithDependencyOnTryCatchBlock.class)
+                .getMethod("complexCatchMethod");
+        TryCatchBlock tryCatchBlock = getOnlyElement(method.getTryCatchBlocks());
+
+        Set<Dependency> dependencies = Dependency.tryCreateFromTryCatchBlock(tryCatchBlock);
+
+        Assertions.assertThatDependencies(dependencies).satisfiesExactlyInAnyOrder(
+                dependency -> Assertions.assertThatDependency(dependency)
+                    .matches(ClassWithDependencyOnTryCatchBlock.class, IllegalStateException.class)
+                    .hasDescription(method.getFullName(), "catches type", IllegalStateException.class.getName())
+                    .inLocation(ClassWithDependencyOnTryCatchBlock.class, 35),
+                dependency -> Assertions.assertThatDependency(dependency)
+                    .matches(ClassWithDependencyOnTryCatchBlock.class, IOException.class)
+                    .hasDescription(method.getFullName(), "catches type", IOException.class.getName())
+                    .inLocation(ClassWithDependencyOnTryCatchBlock.class, 35)
+                );
     }
 
     @DataProvider

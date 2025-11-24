@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ComparisonChain;
@@ -123,6 +124,12 @@ public class Dependency implements HasDescription, Comparable<Dependency>, HasSo
 
     static Set<Dependency> tryCreateFromThrowsDeclaration(ThrowsDeclaration<? extends JavaCodeUnit> declaration) {
         return tryCreateDependency(declaration.getLocation(), "throws type", declaration.getRawType());
+    }
+
+    static Set<Dependency> tryCreateFromTryCatchBlock(TryCatchBlock tryCatchBlock) {
+        return tryCatchBlock.getCaughtThrowables().stream()
+                .flatMap(caughtThrowable -> tryCreateDependency(tryCatchBlock.getOwner(), "catches type", caughtThrowable, tryCatchBlock.getSourceCodeLocation()).stream())
+                .collect(Collectors.toSet());
     }
 
     static Set<Dependency> tryCreateFromInstanceofCheck(InstanceofCheck instanceofCheck) {
