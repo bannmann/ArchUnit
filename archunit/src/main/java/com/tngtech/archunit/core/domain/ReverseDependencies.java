@@ -226,6 +226,11 @@ final class ReverseDependencies {
                 for (ThrowsDeclaration<JavaConstructor> throwsDeclaration : constructor.getThrowsClause()) {
                     constructorThrowsDeclarationDependencies.put(throwsDeclaration.getRawType(), throwsDeclaration);
                 }
+                for (TryCatchBlock tryCatchBlock : constructor.getTryCatchBlocks()) {
+                    for (JavaClass caughtThrowable : tryCatchBlock.getCaughtThrowables()) {
+                        tryCatchBlockDependencies.put(caughtThrowable.toErasure(), tryCatchBlock);
+                    }
+                }
                 for (InstanceofCheck instanceofCheck : constructor.getInstanceofChecks()) {
                     instanceofCheckDependencies.put(instanceofCheck.getRawType(), instanceofCheck);
                 }
@@ -264,11 +269,16 @@ final class ReverseDependencies {
         }
 
         private void registerStaticInitializer(JavaClass clazz) {
-            if (clazz.getStaticInitializer().isPresent()) {
-                for (InstanceofCheck instanceofCheck : clazz.getStaticInitializer().get().getInstanceofChecks()) {
+            clazz.getStaticInitializer().ifPresent(staticInitializer -> {
+                for (TryCatchBlock tryCatchBlock : staticInitializer.getTryCatchBlocks()) {
+                    for (JavaClass caughtThrowable : tryCatchBlock.getCaughtThrowables()) {
+                        tryCatchBlockDependencies.put(caughtThrowable.toErasure(), tryCatchBlock);
+                    }
+                }
+                for (InstanceofCheck instanceofCheck : staticInitializer.getInstanceofChecks()) {
                     instanceofCheckDependencies.put(instanceofCheck.getRawType(), instanceofCheck);
                 }
-            }
+            });
         }
 
         void finish(Iterable<JavaClass> classes) {
