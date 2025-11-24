@@ -827,7 +827,11 @@ public class JavaClassTest {
                 .areAtLeastOne(methodChecksInstanceOfDependency()
                         .from(AhavingMembersOfTypeB.class)
                         .to(B.class)
-                        .inLineNumber(25));
+                        .inLineNumber(25))
+                .areAtLeastOne(methodTryCatchDependency()
+                        .from(AhavingMembersOfTypeB.class)
+                        .to(B.class)
+                        .inLineNumber(99));
     }
 
     @Test
@@ -1306,7 +1310,11 @@ public class JavaClassTest {
                 .areAtLeastOne(methodChecksInstanceOfDependency()
                         .from(AhavingMembersOfTypeB.class)
                         .to(B.class)
-                        .inLineNumber(25));
+                        .inLineNumber(25))
+                .areAtLeastOne(methodTryCatchDependency()
+                        .from(AhavingMembersOfTypeB.class)
+                        .to(B.class)
+                        .inLineNumber(30));
 
         JavaClass exceptionClass = importClassesWithContext(AhavingMembersOfTypeB.class, B.BException.class)
                 .get(B.BException.class);
@@ -2099,6 +2107,10 @@ public class JavaClassTest {
 
     private static DependencyConditionCreation methodThrowsDeclarationDependency() {
         return new DependencyConditionCreation("throws type");
+    }
+
+    private static DependencyConditionCreation methodTryCatchDependency() {
+        return new DependencyConditionCreation("catches type");
     }
 
     private static DependencyConditionCreation methodChecksInstanceOfDependency() {

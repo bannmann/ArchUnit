@@ -24,4 +24,12 @@ public class AhavingMembersOfTypeB {
     void checkingInstanceOfB() {
         boolean check = new Object() instanceof B;
     }
+
+    void catchingBException() {
+        try {
+            throwingBException();
+        } catch (B.BException e) {
+
+        }
+    }
 }

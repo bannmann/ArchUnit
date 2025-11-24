@@ -15,6 +15,7 @@ import com.tngtech.archunit.base.DescribedPredicate;
 import com.tngtech.archunit.core.domain.testobjects.ClassWithArrayDependencies;
 import com.tngtech.archunit.core.domain.testobjects.ClassWithDependencyOnInstanceofCheck;
 import com.tngtech.archunit.core.domain.testobjects.ClassWithDependencyOnInstanceofCheck.InstanceOfCheckTarget;
+import com.tngtech.archunit.core.domain.testobjects.ClassWithDependencyOnTryCatchBlock;
 import com.tngtech.archunit.core.domain.testobjects.DependenciesOnClassObjects;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.testutil.Assertions;
@@ -198,6 +199,21 @@ public class DependencyTest {
         assertThatType(dependency.getTargetClass()).matches(IOException.class);
         assertThat(dependency.getDescription()).as("description")
                 .contains("Method <" + origin.getFullName() + "> throws type <" + IOException.class.getName() + ">");
+    }
+
+    @Test
+    public void Dependency_from_catch_block() {
+        JavaClass originClass = importClassesWithContext(ClassWithDependencyOnTryCatchBlock.class, IOException.class)
+                .get(ClassWithDependencyOnTryCatchBlock.class);
+        JavaMethod originMethod = originClass.getMethod("method");
+        TryCatchBlock tryCatchBlock = getOnlyElement(originMethod.getTryCatchBlocks());
+
+        Dependency dependency = getOnlyElement(Dependency.tryCreateFromTryCatchBlock(tryCatchBlock));
+
+        Assertions.assertThatDependency(dependency)
+                .matches(ClassWithDependencyOnTryCatchBlock.class, IOException.class)
+                .hasDescription(originMethod.getFullName(), "catches type", IOException.class.getName())
+                .inLocation(ClassWithDependencyOnTryCatchBlock.class, 14);
     }
 
     @DataProvider
