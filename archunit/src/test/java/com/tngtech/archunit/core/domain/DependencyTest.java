@@ -213,7 +213,7 @@ public class DependencyTest {
         Assertions.assertThatDependency(dependency)
                 .matches(ClassWithDependencyOnTryCatchBlock.class, IOException.class)
                 .hasDescription(originMethod.getFullName(), "catches type", IOException.class.getName())
-                .inLocation(ClassWithDependencyOnTryCatchBlock.class, 14);
+                .inLocation(ClassWithDependencyOnTryCatchBlock.class, 9);
     }
 
     @DataProvider
