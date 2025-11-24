@@ -222,7 +222,7 @@ public class DependencyTest {
 
         JavaMethod method = importClassesWithContext(ClassWithDependencyOnTryCatchBlock.class, IllegalStateException.class, IOException.class)
                 .get(ClassWithDependencyOnTryCatchBlock.class)
-                .getMethod("simpleCatchMethod");
+                .getMethod("complexCatchMethod");
         TryCatchBlock tryCatchBlock = getOnlyElement(method.getTryCatchBlocks());
 
         Set<Dependency> dependencies = Dependency.tryCreateFromTryCatchBlock(tryCatchBlock);
