@@ -3,11 +3,22 @@ package com.tngtech.archunit.core.domain.testobjects;
 @DomainAnnotation
 @SuppressWarnings({"RedundantThrows", "unused"})
 public class AhavingMembersOfTypeB {
+    static {
+        try {
+            throw new B.BException();
+        } catch (B.BException e) {
+        }
+    }
     private B b;
     private boolean staticInitializerInstanceofCheck = new Object() instanceof B;
 
     public AhavingMembersOfTypeB(B b) throws B.BException {
         this.b = b;
+
+        try {
+            throw new B.BException();
+        } catch (B.BException e) {
+        }
     }
 
     B methodReturningB() {
@@ -27,7 +38,7 @@ public class AhavingMembersOfTypeB {
 
     void catchingBException() {
         try {
-            throwingBException();
+            throw new B.BException();
         } catch (B.BException e) {
 
         }

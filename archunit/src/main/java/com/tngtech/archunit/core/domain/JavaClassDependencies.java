@@ -168,8 +168,7 @@ class JavaClassDependencies {
     }
 
     private Stream<Dependency> tryCatchBlockDependenciesFromSelf() {
-        return javaClass.getMethods().stream()
-                .flatMap(method -> method.getTryCatchBlocks().stream())
+        return javaClass.getTryCatchBlocks().stream()
                 .flatMap(tryCatchBlock -> Dependency.tryCreateFromTryCatchBlock(tryCatchBlock).stream());
     }
 

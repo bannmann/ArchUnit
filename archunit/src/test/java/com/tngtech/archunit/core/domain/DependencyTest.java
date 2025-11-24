@@ -201,19 +201,28 @@ public class DependencyTest {
                 .contains("Method <" + origin.getFullName() + "> throws type <" + IOException.class.getName() + ">");
     }
 
-    @Test
-    public void Dependency_from_catch_block() {
-        JavaClass originClass = importClassesWithContext(ClassWithDependencyOnTryCatchBlock.class, IOException.class)
+    @DataProvider
+    public static Object[][] with_try_catch_block_members() {
+        JavaClass javaClass = importClassesWithContext(ClassWithDependencyOnTryCatchBlock.class, IOException.class)
                 .get(ClassWithDependencyOnTryCatchBlock.class);
-        JavaMethod originMethod = originClass.getMethod("method");
-        TryCatchBlock tryCatchBlock = getOnlyElement(originMethod.getTryCatchBlocks());
+
+        return $$(
+                $(javaClass.getStaticInitializer().get(), 9),
+                $(javaClass.getConstructor(), 17),
+                $(javaClass.getMethod("method"), 24));
+    }
+
+    @Test
+    @UseDataProvider("with_try_catch_block_members")
+    public void Dependency_from_catch_block(JavaCodeUnit memberWithTryCatchBlock, int expectedLineNumber) {
+        TryCatchBlock tryCatchBlock = getOnlyElement(memberWithTryCatchBlock.getTryCatchBlocks());
 
         Dependency dependency = getOnlyElement(Dependency.tryCreateFromTryCatchBlock(tryCatchBlock));
 
         Assertions.assertThatDependency(dependency)
                 .matches(ClassWithDependencyOnTryCatchBlock.class, IOException.class)
-                .hasDescription(originMethod.getFullName(), "catches type", IOException.class.getName())
-                .inLocation(ClassWithDependencyOnTryCatchBlock.class, 9);
+                .hasDescription(memberWithTryCatchBlock.getFullName(), "catches type", IOException.class.getName())
+                .inLocation(ClassWithDependencyOnTryCatchBlock.class, expectedLineNumber);
     }
 
     @DataProvider
