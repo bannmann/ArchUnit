@@ -830,7 +830,7 @@ public class JavaClassTest {
                         .inLineNumber(25))
                 .areAtLeastOne(methodTryCatchDependency()
                         .from(AhavingMembersOfTypeB.class)
-                        .to(B.class)
+                        .to(B.BException.class)
                         .inLineNumber(30));
     }
 
