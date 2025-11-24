@@ -43,6 +43,9 @@ import com.tngtech.archunit.core.importer.testexamples.methodimport.ClassWithObj
 import com.tngtech.archunit.core.importer.testexamples.methodimport.ClassWithStringStringMethod;
 import com.tngtech.archunit.core.importer.testexamples.methodimport.ClassWithThrowingMethod;
 import com.tngtech.archunit.core.importer.testexamples.referencedclassobjects.ReferencingClassObjects;
+import com.tngtech.archunit.core.importer.testexamples.trycatch.CatchClauseTargetException;
+import com.tngtech.archunit.core.importer.testexamples.trycatch.ClassWithComplexTryCatchBlocks;
+import com.tngtech.archunit.core.importer.testexamples.trycatch.ClassWithSimpleTryCatchBlocks;
 import com.tngtech.archunit.testutil.assertion.ReferencedClassObjectsAssertion.ExpectedReferencedClassObject;
 import org.assertj.core.util.Objects;
 import org.junit.Test;
@@ -372,5 +375,18 @@ public class ClassFileImporterMembersTest {
                 ChecksInstanceofInConstructor.class,
                 ChecksInstanceofInStaticInitializer.class,
                 ChecksMultipleInstanceofs.class);
+    }
+
+    @Test
+    public void classes_know_which_catch_clauses_contain_their_type() {
+        JavaClass clazz = new ClassFileImporter().importPackagesOf(CatchClauseTargetException.class).get(CatchClauseTargetException.class);
+
+        Set<JavaClass> origins = clazz.getTryCatchBlocksThatCatchSelf().stream()
+                .map(tryCatchBlock -> tryCatchBlock.getOwner().getOwner())
+                .collect(toSet());
+
+        assertThatTypes(origins).matchInAnyOrder(
+                ClassWithComplexTryCatchBlocks.class,
+                ClassWithSimpleTryCatchBlocks.class);
     }
 }
