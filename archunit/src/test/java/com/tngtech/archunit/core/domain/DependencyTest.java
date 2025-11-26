@@ -13,9 +13,9 @@ import java.util.function.Supplier;
 import com.google.common.base.MoreObjects;
 import com.tngtech.archunit.base.DescribedPredicate;
 import com.tngtech.archunit.core.domain.testobjects.ClassWithArrayDependencies;
+import com.tngtech.archunit.core.domain.testobjects.ClassWithDependencyOnCaughtException;
 import com.tngtech.archunit.core.domain.testobjects.ClassWithDependencyOnInstanceofCheck;
 import com.tngtech.archunit.core.domain.testobjects.ClassWithDependencyOnInstanceofCheck.InstanceOfCheckTarget;
-import com.tngtech.archunit.core.domain.testobjects.ClassWithDependencyOnTryCatchBlock;
 import com.tngtech.archunit.core.domain.testobjects.DependenciesOnClassObjects;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.testutil.Assertions;
@@ -203,13 +203,13 @@ public class DependencyTest {
 
     @DataProvider
     public static Object[][] with_try_catch_block_members() {
-        JavaClass javaClass = importClassesWithContext(ClassWithDependencyOnTryCatchBlock.class, IOException.class)
-                .get(ClassWithDependencyOnTryCatchBlock.class);
+        JavaClass javaClass = importClassesWithContext(ClassWithDependencyOnCaughtException.class, IOException.class)
+                .get(ClassWithDependencyOnCaughtException.class);
 
         return $$(
                 $(javaClass.getStaticInitializer().get(), 9),
-                $(javaClass.getConstructor(), 17),
-                $(javaClass.getMethod("simpleCatchMethod"), 24)
+                $(javaClass.getConstructor(), 16),
+                $(javaClass.getMethod("simpleCatchMethod"), 23)
         );
     }
 
@@ -221,16 +221,15 @@ public class DependencyTest {
         Dependency dependency = getOnlyElement(Dependency.tryCreateFromTryCatchBlock(tryCatchBlock));
 
         Assertions.assertThatDependency(dependency)
-                .matches(ClassWithDependencyOnTryCatchBlock.class, IOException.class)
+                .matches(ClassWithDependencyOnCaughtException.class, IOException.class)
                 .hasDescription(memberWithTryCatchBlock.getFullName(), "catches type", IOException.class.getName())
-                .inLocation(ClassWithDependencyOnTryCatchBlock.class, expectedLineNumber);
+                .inLocation(ClassWithDependencyOnCaughtException.class, expectedLineNumber);
     }
 
     @Test
     public void Dependency_from_union_catch_block() {
-
-        JavaMethod method = importClassesWithContext(ClassWithDependencyOnTryCatchBlock.class, IllegalStateException.class, IOException.class)
-                .get(ClassWithDependencyOnTryCatchBlock.class)
+        JavaMethod method = importClassesWithContext(ClassWithDependencyOnCaughtException.class, IllegalStateException.class, IOException.class)
+                .get(ClassWithDependencyOnCaughtException.class)
                 .getMethod("complexCatchMethod");
         TryCatchBlock tryCatchBlock = getOnlyElement(method.getTryCatchBlocks());
 
@@ -238,13 +237,13 @@ public class DependencyTest {
 
         Assertions.assertThatDependencies(dependencies).satisfiesExactlyInAnyOrder(
                 dependency -> Assertions.assertThatDependency(dependency)
-                    .matches(ClassWithDependencyOnTryCatchBlock.class, IllegalStateException.class)
+                        .matches(ClassWithDependencyOnCaughtException.class, IllegalStateException.class)
                     .hasDescription(method.getFullName(), "catches type", IllegalStateException.class.getName())
-                    .inLocation(ClassWithDependencyOnTryCatchBlock.class, 35),
+                        .inLocation(ClassWithDependencyOnCaughtException.class, 34),
                 dependency -> Assertions.assertThatDependency(dependency)
-                    .matches(ClassWithDependencyOnTryCatchBlock.class, IOException.class)
+                        .matches(ClassWithDependencyOnCaughtException.class, IOException.class)
                     .hasDescription(method.getFullName(), "catches type", IOException.class.getName())
-                    .inLocation(ClassWithDependencyOnTryCatchBlock.class, 35)
+                        .inLocation(ClassWithDependencyOnCaughtException.class, 34)
                 );
     }
 

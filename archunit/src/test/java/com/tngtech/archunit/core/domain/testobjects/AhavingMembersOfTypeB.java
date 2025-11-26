@@ -40,7 +40,6 @@ public class AhavingMembersOfTypeB {
         try {
             throw new B.BException();
         } catch (B.BException e) {
-
         }
     }
 }

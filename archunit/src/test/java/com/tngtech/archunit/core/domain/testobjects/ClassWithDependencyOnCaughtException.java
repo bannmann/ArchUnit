@@ -3,7 +3,7 @@ package com.tngtech.archunit.core.domain.testobjects;
 import java.io.IOException;
 
 @SuppressWarnings("unused")
-public class ClassWithDependencyOnTryCatchBlock {
+public class ClassWithDependencyOnCaughtException {
     static {
         try {
             throw new IOException();
@@ -11,8 +11,7 @@ public class ClassWithDependencyOnTryCatchBlock {
         }
     }
 
-    ClassWithDependencyOnTryCatchBlock()
-    {
+    ClassWithDependencyOnCaughtException() {
         try {
             throw new IOException();
         } catch (IOException e) {
