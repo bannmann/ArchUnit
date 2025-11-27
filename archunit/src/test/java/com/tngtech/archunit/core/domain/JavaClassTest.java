@@ -38,6 +38,7 @@ import com.tngtech.archunit.core.domain.testobjects.BException1;
 import com.tngtech.archunit.core.domain.testobjects.BException2;
 import com.tngtech.archunit.core.domain.testobjects.BException3;
 import com.tngtech.archunit.core.domain.testobjects.BReferencedByA;
+import com.tngtech.archunit.core.domain.testobjects.ClassWithDependencyOnInstanceofCheck;
 import com.tngtech.archunit.core.domain.testobjects.ComponentTypeDependency;
 import com.tngtech.archunit.core.domain.testobjects.DependenciesOnClassObjects;
 import com.tngtech.archunit.core.domain.testobjects.InterfaceForA;
@@ -813,6 +814,10 @@ public class JavaClassTest {
         JavaClass javaClass = importClasses(AhavingMembersOfTypeB.class, B.class).get(AhavingMembersOfTypeB.class);
 
         assertThat(javaClass.getDirectDependenciesFromSelf())
+                .areAtLeastOne(fieldTypeDependency()
+                        .from(AhavingMembersOfTypeB.class)
+                        .to(B.class)
+                        .inLineNumber(0))
                 .areAtLeastOne(methodReturnTypeDependency()
                         .from(AhavingMembersOfTypeB.class)
                         .to(B.class)
@@ -820,15 +825,66 @@ public class JavaClassTest {
                 .areAtLeast(2, parameterTypeDependency()
                         .from(AhavingMembersOfTypeB.class)
                         .to(B.class)
+                        .inLineNumber(0));
+    }
+
+    @Test
+    public void direct_dependencies_to_self_by_member_declarations() {
+        JavaClass javaClass = importClassesWithContext(AhavingMembersOfTypeB.class, B.class).get(B.class);
+
+        assertThat(javaClass.getDirectDependenciesToSelf())
+                .areAtLeastOne(fieldTypeDependency()
+                        .from(AhavingMembersOfTypeB.class)
+                        .to(B.class)
                         .inLineNumber(0))
-                .areAtLeastOne(methodChecksInstanceOfDependency()
+                .areAtLeastOne(methodReturnTypeDependency()
                         .from(AhavingMembersOfTypeB.class)
                         .to(B.class)
-                        .inLineNumber(7))
-                .areAtLeastOne(methodChecksInstanceOfDependency()
+                        .inLineNumber(0))
+                .areAtLeast(2, parameterTypeDependency()
                         .from(AhavingMembersOfTypeB.class)
                         .to(B.class)
-                        .inLineNumber(21));
+                        .inLineNumber(0));
+    }
+
+    @Test
+    public void direct_dependencies_from_self_by_instanceof_checks() {
+        JavaClass javaClass = importClasses(ClassWithDependencyOnInstanceofCheck.class, ClassWithDependencyOnInstanceofCheck.InstanceOfCheckTarget.class)
+                .get(ClassWithDependencyOnInstanceofCheck.class);
+
+        assertThat(javaClass.getDirectDependenciesFromSelf())
+                .areAtLeastOne(methodChecksInstanceOfDependency()
+                        .from(ClassWithDependencyOnInstanceofCheck.class)
+                        .to(ClassWithDependencyOnInstanceofCheck.InstanceOfCheckTarget.class)
+                        .inLineNumber(6))
+                .areAtLeastOne(methodChecksInstanceOfDependency()
+                        .from(ClassWithDependencyOnInstanceofCheck.class)
+                        .to(ClassWithDependencyOnInstanceofCheck.InstanceOfCheckTarget.class)
+                        .inLineNumber(9))
+                .areAtLeastOne(methodChecksInstanceOfDependency()
+                        .from(ClassWithDependencyOnInstanceofCheck.class)
+                        .to(ClassWithDependencyOnInstanceofCheck.InstanceOfCheckTarget.class)
+                        .inLineNumber(13));
+    }
+
+    @Test
+    public void direct_dependencies_to_self_by_instanceof_checks() {
+        JavaClass javaClass = importClasses(ClassWithDependencyOnInstanceofCheck.class, ClassWithDependencyOnInstanceofCheck.InstanceOfCheckTarget.class)
+                .get(ClassWithDependencyOnInstanceofCheck.InstanceOfCheckTarget.class);
+
+        assertThat(javaClass.getDirectDependenciesToSelf())
+                .areAtLeastOne(methodChecksInstanceOfDependency()
+                        .from(ClassWithDependencyOnInstanceofCheck.class)
+                        .to(ClassWithDependencyOnInstanceofCheck.InstanceOfCheckTarget.class)
+                        .inLineNumber(6))
+                .areAtLeastOne(methodChecksInstanceOfDependency()
+                        .from(ClassWithDependencyOnInstanceofCheck.class)
+                        .to(ClassWithDependencyOnInstanceofCheck.InstanceOfCheckTarget.class)
+                        .inLineNumber(9))
+                .areAtLeastOne(methodChecksInstanceOfDependency()
+                        .from(ClassWithDependencyOnInstanceofCheck.class)
+                        .to(ClassWithDependencyOnInstanceofCheck.InstanceOfCheckTarget.class)
+                        .inLineNumber(13));
     }
 
     @Test
@@ -1363,33 +1419,6 @@ public class JavaClassTest {
                 .contain(from(FirstClass.class).to(BufferedInputStream.class).inLocation(getClass(), 0)
                         .withDescriptionContaining("depends on component type <%s>", BufferedInputStream.class.getName())
                 );
-    }
-
-    @Test
-    public void direct_dependencies_to_self_by_member_declarations() {
-        JavaClass javaClass = importClassesWithContext(AhavingMembersOfTypeB.class, B.class).get(B.class);
-
-        assertThat(javaClass.getDirectDependenciesToSelf())
-                .areAtLeastOne(fieldTypeDependency()
-                        .from(AhavingMembersOfTypeB.class)
-                        .to(B.class)
-                        .inLineNumber(0))
-                .areAtLeastOne(methodReturnTypeDependency()
-                        .from(AhavingMembersOfTypeB.class)
-                        .to(B.class)
-                        .inLineNumber(0))
-                .areAtLeast(2, parameterTypeDependency()
-                        .from(AhavingMembersOfTypeB.class)
-                        .to(B.class)
-                        .inLineNumber(0))
-                .areAtLeastOne(methodChecksInstanceOfDependency()
-                        .from(AhavingMembersOfTypeB.class)
-                        .to(B.class)
-                        .inLineNumber(7))
-                .areAtLeastOne(methodChecksInstanceOfDependency()
-                        .from(AhavingMembersOfTypeB.class)
-                        .to(B.class)
-                        .inLineNumber(21));
     }
 
     @Test
