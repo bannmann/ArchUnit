@@ -209,7 +209,7 @@ public class DependencyTest {
         return $$(
                 $(javaClass.getStaticInitializer().get(), 9),
                 $(javaClass.getConstructor(), 16),
-                $(javaClass.getMethod("simpleCatchMethod"), 23)
+                $(javaClass.getMethod("simpleCatchClauseMethod"), 23)
         );
     }
 
@@ -221,30 +221,45 @@ public class DependencyTest {
         Dependency dependency = getOnlyElement(Dependency.tryCreateFromTryCatchBlock(tryCatchBlock));
 
         Assertions.assertThatDependency(dependency)
-                .matches(ClassWithDependencyOnCaughtException.class, IOException.class)
-                .hasDescription(memberWithTryCatchBlock.getFullName(), "catches type", IOException.class.getName())
-                .inLocation(ClassWithDependencyOnCaughtException.class, expectedLineNumber);
+                .satisfies(catchesType(IOException.class, memberWithTryCatchBlock, expectedLineNumber, ClassWithDependencyOnCaughtException.class));
+    }
+
+    private static Consumer<Dependency> catchesType(Class<? extends Throwable> targetClass, JavaCodeUnit javaCodeUnit, int expectedLineNumber, Class<?> originClass) {
+        return dependency -> Assertions.assertThatDependency(dependency)
+                .matches(originClass, targetClass)
+                .hasDescription(javaCodeUnit.getFullName(), "catches type", targetClass.getName())
+                .inLocation(originClass, expectedLineNumber);
     }
 
     @Test
-    public void Dependency_from_union_catch_block() {
+    public void Dependency_from_union_catch_clause() {
         JavaMethod method = importClassesWithContext(ClassWithDependencyOnCaughtException.class, IllegalStateException.class, IOException.class)
                 .get(ClassWithDependencyOnCaughtException.class)
-                .getMethod("complexCatchMethod");
+                .getMethod("unionCatchClauseMethod");
         TryCatchBlock tryCatchBlock = getOnlyElement(method.getTryCatchBlocks());
 
         Set<Dependency> dependencies = Dependency.tryCreateFromTryCatchBlock(tryCatchBlock);
 
         Assertions.assertThatDependencies(dependencies).satisfiesExactlyInAnyOrder(
-                dependency -> Assertions.assertThatDependency(dependency)
-                        .matches(ClassWithDependencyOnCaughtException.class, IllegalStateException.class)
-                    .hasDescription(method.getFullName(), "catches type", IllegalStateException.class.getName())
-                        .inLocation(ClassWithDependencyOnCaughtException.class, 34),
-                dependency -> Assertions.assertThatDependency(dependency)
-                        .matches(ClassWithDependencyOnCaughtException.class, IOException.class)
-                    .hasDescription(method.getFullName(), "catches type", IOException.class.getName())
-                        .inLocation(ClassWithDependencyOnCaughtException.class, 34)
-                );
+                catchesType(IllegalStateException.class, method, 30, ClassWithDependencyOnCaughtException.class),
+                catchesType(IOException.class, method, 30, ClassWithDependencyOnCaughtException.class)
+        );
+    }
+
+    @Test
+    public void Dependency_from_multiple_catch_clause() {
+        JavaMethod method = importClassesWithContext(ClassWithDependencyOnCaughtException.class, IllegalStateException.class, IOException.class)
+                .get(ClassWithDependencyOnCaughtException.class)
+                .getMethod("multipleCatchClausesMethod");
+        TryCatchBlock tryCatchBlock = getOnlyElement(method.getTryCatchBlocks());
+
+        Set<Dependency> dependencies = Dependency.tryCreateFromTryCatchBlock(tryCatchBlock);
+
+        Assertions.assertThatDependencies(dependencies).satisfiesExactlyInAnyOrder(
+                catchesType(IllegalStateException.class, method, 37, ClassWithDependencyOnCaughtException.class),
+                catchesType(RuntimeException.class, method, 37, ClassWithDependencyOnCaughtException.class),
+                catchesType(IOException.class, method, 37, ClassWithDependencyOnCaughtException.class)
+        );
     }
 
     @DataProvider

@@ -18,21 +18,26 @@ public class ClassWithDependencyOnCaughtException {
         }
     }
 
-    void simpleCatchMethod() {
+    void simpleCatchClauseMethod() {
         try {
             throw new IOException();
         } catch (IOException e) {
         }
     }
 
-    public static void throwingMethod() throws IOException {
-        throw new IOException();
-    }
-
-    void complexCatchMethod() {
+    void unionCatchClauseMethod() {
         try {
             throw new IOException();
         } catch (IllegalStateException | IOException e) {
+        }
+    }
+
+    void multipleCatchClausesMethod() {
+        try {
+            throw new IOException();
+        } catch (IllegalStateException e) {
+        } catch (RuntimeException e) {
+        } catch (IOException e) {
         }
     }
 }
