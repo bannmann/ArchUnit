@@ -215,7 +215,7 @@ public class DependencyTest {
 
     @Test
     @UseDataProvider("with_try_catch_block_members")
-    public void Dependency_from_simple_catch_block(JavaCodeUnit memberWithTryCatchBlock, int expectedLineNumber) {
+    public void Dependency_from_simple_catch_clause(JavaCodeUnit memberWithTryCatchBlock, int expectedLineNumber) {
         TryCatchBlock tryCatchBlock = getOnlyElement(memberWithTryCatchBlock.getTryCatchBlocks());
 
         Dependency dependency = getOnlyElement(Dependency.tryCreateFromTryCatchBlock(tryCatchBlock));
@@ -247,7 +247,7 @@ public class DependencyTest {
     }
 
     @Test
-    public void Dependency_from_multiple_catch_clause() {
+    public void Dependency_from_multiple_catch_clauses() {
         JavaMethod method = importClassesWithContext(ClassWithDependencyOnCaughtException.class, IllegalStateException.class, IOException.class)
                 .get(ClassWithDependencyOnCaughtException.class)
                 .getMethod("multipleCatchClausesMethod");
