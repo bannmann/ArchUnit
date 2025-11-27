@@ -363,6 +363,20 @@ public class ClassFileImporterMembersTest {
     }
 
     @Test
+    public void non_throwable_classes_report_that_no_method_throws_clause_contains_their_type() {
+        JavaClass stringClass = new ClassFileImporter().importClass(String.class);
+
+        assertThat(stringClass.getMethodThrowsDeclarationsWithTypeOfSelf()).isEmpty();
+    }
+
+    @Test
+    public void non_throwable_classes_report_that_no_constructor_throws_clause_contains_their_type() {
+        JavaClass stringClass = new ClassFileImporter().importClass(String.class);
+
+        assertThat(stringClass.getConstructorsWithThrowsDeclarationTypeOfSelf()).isEmpty();
+    }
+
+    @Test
     public void classes_know_which_instanceof_checks_check_their_type() {
         JavaClass clazz = new ClassFileImporter().importPackagesOf(InstanceofChecked.class).get(InstanceofChecked.class);
 
@@ -389,4 +403,12 @@ public class ClassFileImporterMembersTest {
                 ClassWithComplexTryCatchBlocks.class,
                 ClassWithSimpleTryCatchBlocks.class);
     }
+
+    @Test
+    public void non_throwable_classes_report_that_no_catch_clause_contains_their_type() {
+        JavaClass stringClass = new ClassFileImporter().importClass(String.class);
+
+        assertThat(stringClass.getTryCatchBlocksThatCatchSelf()).isEmpty();
+    }
+
 }
